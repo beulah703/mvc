@@ -1161,3 +1161,182 @@ public class Passengers {
 	}
 
 }
+import java.util.ArrayList;
+
+public class ClassModel {
+	String TrainName;
+	int Trainno;
+
+	String from;
+	String to;
+	ArrayList<String> tnc = new ArrayList();
+
+	ClassModel() {
+
+	}
+
+	public String getTrainName() {
+		return TrainName;
+
+	}
+
+	public void setTrainName(String Trn) {
+		this.TrainName = Trn;
+	}
+
+	public int getTrainno() {
+		return Trainno;
+	}
+
+	public void setTrainno(int trno) {
+		this.Trainno = trno;
+	}
+
+	public String getcls() {
+		String s = " ";
+		for (int i = 0; i < tnc.size(); i++) {
+			s = s + tnc.get(i) + ",";
+		}
+		return s;
+	}
+
+	public void setcls(String cls) {
+		tnc.add(cls);
+	}
+
+}
+
+
+import java.util.ArrayList;
+
+public class FromTomodel {
+
+	String from;
+	String to;
+	ArrayList<String> al = new ArrayList();
+
+	FromTomodel() {
+
+	}
+
+	public String getfrom() {
+		String s = " ";
+		for (int i = 0; i < al.size(); i++) {
+			s = s + al.get(i) + ",";
+		}
+		return s;
+	}
+
+	public void setfrom(String from) {
+		al.add(from);
+	}
+
+}
+
+import java.util.ArrayList;
+
+public class TrainsModel {
+	String TrainName;
+	int Trainno;
+
+	String from;
+	String to;
+	ArrayList<String> tn = new ArrayList();
+	ArrayList<String> tr = new ArrayList();
+
+	TrainsModel() {
+
+	}
+
+	public String getTrainName() {
+		String s = " ";
+		for (int i = 0; i < tn.size(); i++) {
+			s = s + tn.get(i) + ",";
+		}
+		return s;
+
+	}
+
+	public void setTrainName(String Trn) {
+		tn.add(Trn);
+	}
+
+	public String getTrainno() {
+		String s = " ";
+		for (int i = 0; i < tr.size(); i++) {
+			s = s + tr.get(i) + ",";
+		}
+		return s;
+	}
+
+	public void setTrainno(String trno) {
+		tr.add(trno);
+	}
+
+	public String getfrom() {
+		return from;
+	}
+
+	public void setfrom(String from) {
+		this.from = from;
+	}
+
+	public String getto() {
+		return to;
+	}
+
+	public void setto(String to) {
+		this.to = to;
+	}
+}
+
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class BusinessLogicFare {
+	// TrainDAL td= new TrainDAL();
+	public List<Double> bbl(double classfare, double distfare, ArrayList<Passengers> pass) {
+
+		List<Double> fareList = new ArrayList<>();
+		for (Passengers y : pass) {
+			double TotalFare = distfare * classfare;
+			if (y.getage() > 0 && y.getage() < 6) {
+				TotalFare = 0;
+			} else if (y.getage() > 5 && y.getage() < 13) {
+				TotalFare = TotalFare / 2;
+			} else if (y.getage() >= 65 && y.getGender().equals("Male")) {
+				TotalFare = TotalFare - (TotalFare / 4);
+			} else if (y.getage() >= 58 && y.getGender().equals("Female")) {
+				TotalFare = TotalFare - (TotalFare / 4);
+			}
+			fareList.add(TotalFare);
+
+		}
+
+		return fareList;
+
+	}
+
+	public double bblFinal(double classfare, double distfare, ArrayList<Passengers> pass) {
+		double TotalFare = distfare * classfare;
+
+		for (Passengers y : pass) {
+
+			if (y.getage() > 0 && y.getage() < 6) {
+				TotalFare += 0;
+			} else if (y.getage() > 5 && y.getage() < 13) {
+				TotalFare += TotalFare / 2;
+			} else if (y.getage() >= 65 && y.getGender().equals("Male")) {
+				TotalFare += TotalFare - (TotalFare / 4);
+			} else if (y.getage() >= 58 && y.getGender().equals("Female")) {
+				TotalFare += TotalFare - (TotalFare / 4);
+			}
+
+		}
+
+		return TotalFare;
+
+	}
+}
