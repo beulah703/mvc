@@ -1,11 +1,9 @@
-package MVC;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -31,52 +29,67 @@ public class TrainController extends HttpServlet {
 	public void callDAL(HttpServletRequest request, HttpServletResponse response) {
 
 		int pa1, pa2, pa3, pa4, pa5;
-		String p1, p2, p3, p4, p5,pg1,pg2,pg3,pg4,pg5;
+		String p1, p2, p3, p4, p5, pg1, pg2, pg3, pg4, pg5;
 
 		try {
 			String status = request.getParameter("status");
 			// String status = "FromTo";
 			if (status.equals("FromTo")) {
-				String s[] = td.FromTo(response).split(",");
-				for (String s1 : s) {
-					response.getWriter().print("<option>" + s1 + "</option>" + "<br>");
+				TrainDAL td = new TrainDAL();
+
+				FromTomodel fm = td.FromTo(response);
+				String[] s1 = fm.getfrom().split(",");
+				for (String x : s1) {
+					response.getWriter().print("<option>" + x + "</option>" + "<br>");
 				}
 			}
 
 			else if (status.equals("Trains")) {
+				TrainDAL td = new TrainDAL();
+
 				String from = request.getParameter("from");
 				String to = request.getParameter("to");
-				// String datee = request.getParameter("dates");
-				String tran[] = td.Trains(from, to, response).split(",");
-				for (String s1 : tran) {
-					response.getWriter().print("<option>" + s1 + "</option>" + "<br>");
+
+				TrainsModel tm = td.Trains(from, to, response);
+				String s1[] = tm.getTrainName().split(",");
+				String s2[] = tm.getTrainno().split(",");
+				for (int i = 0; i < s1.length; i++) {
+					String y = " ";
+					y += s2[i] + " " + s1[i];
+
+					response.getWriter().print("<option>" + y + "</option>" + "<br>");
+
 				}
 			}
 
 			else if (status.equals("Classes")) {
+				TrainDAL td = new TrainDAL();
 
 				int TrainNo = Integer.parseInt(request.getParameter("TrainNo"));
 				// int TrainNo = 22824;
-				String clas[] = td.TrainClass(TrainNo, response).split(",");
-				for (String s1 : clas) {
+				ClassModel cm = td.TrainClass(TrainNo, response);
+				String[] s = cm.getcls().split(",");
+				for (String s1 : s) {
 					response.getWriter().print("<option>" + s1 + "</option>" + "<br>");
 				}
 
 			}
 
 			else if (status.equals("Fare")) {
+				TrainDAL td = new TrainDAL();
+
 				String from = request.getParameter("from");
 				String to = request.getParameter("to");
 				String lsc = request.getParameter("lsc");
-				System.out.println("Class is"+lsc);
+				System.out.println("Class is" + lsc);
 				int TrainNo = Integer.parseInt(request.getParameter("TrainNo"));
 				double classfare = td.TrainFareclass(lsc, TrainNo, response);
 				System.out.println(classfare);
 				double distfare = td.TrainFaredist(from, to, TrainNo, response);
 				System.out.println(distfare);
-//				
-//				double TotalFare = distfare * classfare;
-//				System.out.println(TotalFare);
+				//
+				// double TotalFare = distfare * classfare;
+				// System.out.println(TotalFare);
 				response.setContentType("text/html");
 				p1 = request.getParameter("p1");
 				p2 = request.getParameter("p2");
@@ -93,11 +106,11 @@ public class TrainController extends HttpServlet {
 				pg3 = request.getParameter("pg3");
 				pg4 = request.getParameter("pg3");
 				pg5 = request.getParameter("pg4");
-				Passengers pass1 = new Passengers(p1, pa1,pg1);
-				Passengers pass2 = new Passengers(p2, pa2,pg2);
-				Passengers pass3 = new Passengers(p3, pa3,pg3);
-				Passengers pass4 = new Passengers(p4, pa4,pg4);
-				Passengers pass5 = new Passengers(p5, pa5,pg5);
+				Passengers pass1 = new Passengers(p1, pa1, pg1);
+				Passengers pass2 = new Passengers(p2, pa2, pg2);
+				Passengers pass3 = new Passengers(p3, pa3, pg3);
+				Passengers pass4 = new Passengers(p4, pa4, pg4);
+				Passengers pass5 = new Passengers(p5, pa5, pg5);
 
 				ArrayList<Passengers> pass = new ArrayList<>();
 				pass.add(pass1);
@@ -105,37 +118,40 @@ public class TrainController extends HttpServlet {
 				pass.add(pass3);
 				pass.add(pass4);
 				pass.add(pass5);
-				BusinessLogicFare blf=new BusinessLogicFare();
-				 List<Double> FinalfareList=blf.bbl(classfare,distfare,pass);
-				//double TotalFare1 = 0;
-//				for (Passengers y : pass) {
-//
-//					if (y.getage() > 10 && y.getage() < 80) {
-//						TotalFare1 += TotalFare;
-//					} else if (y.getage() > 80 || y.getage() < 10) {
-//						TotalFare1 += TotalFare / 2;
-//					}
-//				}
+
+				BusinessLogicFare blf = new BusinessLogicFare();
+
+				List<Double> FinalfareList = blf.bbl(classfare, distfare, pass);
+				// double TotalFare1 = 0;
+				// for (Passengers y : pass) {
+				//
+				// if (y.getage() > 10 && y.getage() < 80) {
+				// TotalFare1 += TotalFare;
+				// } else if (y.getage() > 80 || y.getage() < 10) {
+				// TotalFare1 += TotalFare / 2;
+				// }
+				// }
 
 				// Get the PrintWriter object to write the response
-				double TotalFare1= blf.bblFinal(classfare,distfare,pass);
+				double TotalFare1 = blf.bblFinal(classfare, distfare, pass);
 				PrintWriter out = response.getWriter();
 				out.println("<script>document.getElementById('fare').value = " + TotalFare1 + ";</script>");
 
-			}
-			else if (status.equals("Save")) {
+			} else if (status.equals("Save")) {
+				TrainDAL td = new TrainDAL();
+
 				String from = request.getParameter("from");
 				String to = request.getParameter("to");
 				String lsc = request.getParameter("lsc");
 				int TrainNo = Integer.parseInt(request.getParameter("TrainNo"));
 				String Trname = request.getParameter("TrainName");
-			
+
 				int Fare = Integer.parseInt(request.getParameter("fare"));
 				System.out.println(from);
 				System.out.println(to);
 				System.out.println(lsc);
 				System.out.println(Fare);
-				
+
 				p1 = request.getParameter("p1");
 				p2 = request.getParameter("p2");
 				p3 = request.getParameter("p3");
@@ -151,45 +167,55 @@ public class TrainController extends HttpServlet {
 				pg3 = request.getParameter("pg3");
 				pg4 = request.getParameter("pg3");
 				pg5 = request.getParameter("pg4");
-				Passengers pass1 = new Passengers(p1, pa1,pg1);
-				Passengers pass2 = new Passengers(p2, pa2,pg2);
-				Passengers pass3 = new Passengers(p3, pa3,pg3);
-				Passengers pass4 = new Passengers(p4, pa4,pg4);
-				Passengers pass5 = new Passengers(p5, pa5,pg5);
-				
-				 ArrayList<Passengers> pass = new ArrayList<>();
-				 pass.add(pass1);
-				 pass.add(pass2);
-				 pass.add(pass3);
-				 pass.add(pass4);
-				 pass.add(pass5);
-				 td.SaveDB(TrainNo, Trname, from, to, lsc, pass);
-				 request.setAttribute("TrainNo", TrainNo);
-				 request.setAttribute("TrainName", Trname);
-				 request.setAttribute("From", from);
-				 request.setAttribute("To", to);
-				 request.setAttribute("TrainClass",lsc);
-				 request.setAttribute("fare", Fare);
-				 request.setAttribute("passenger1_name", p1);
-				 request.setAttribute("passenger2_name", p2);
-				 request.setAttribute("passenger3_name", p3);
-				 request.setAttribute("passenger4_name", p4);
-				 request.setAttribute("passenger5_name", p5);
-				 request.setAttribute("passenger1_age", pa1);
-				 request.setAttribute("passenger2_age", pa2);
-				 request.setAttribute("passenger3_age", pa3);
-				 request.setAttribute("passenger4_age", pa4);
-				 request.setAttribute("passenger5_age", pa5);
-				 
-				 RequestDispatcher dispatcher = request.getRequestDispatcher("preview.jsp");
-				 dispatcher.forward(request, response);
-				 }
+				Passengers pass1 = new Passengers(p1, pa1, pg1);
+				Passengers pass2 = new Passengers(p2, pa2, pg2);
+				Passengers pass3 = new Passengers(p3, pa3, pg3);
+				Passengers pass4 = new Passengers(p4, pa4, pg4);
+				Passengers pass5 = new Passengers(p5, pa5, pg5);
+
+				ArrayList<Passengers> pass = new ArrayList<>();
+				pass.add(pass1);
+				pass.add(pass2);
+				pass.add(pass3);
+				pass.add(pass4);
+				pass.add(pass5);
+				// td.SaveDB(TrainNo, Trname, from, to, lsc, pass);
+				// Passengers ps = new Passengers(pass);
+
+				// request.setAttribute("TrainNo", TrainNo);
+				//
+				// request.setAttribute("TrainName", Trname);
+				// request.setAttribute("From", from);
+				// request.setAttribute("To", to);
+				// request.setAttribute("TrainClass", lsc);
+				// request.setAttribute("fare", Fare);
+				// request.setAttribute("passenger1_name", p1);
+				// request.setAttribute("passenger2_name", p2);
+				// request.setAttribute("passenger3_name", p3);
+				// request.setAttribute("passenger4_name", p4);
+				// request.setAttribute("passenger5_name", p5);
+				System.out.println("hrllo3");
+				// request.setAttribute("passenger1_age", pa1);
+				// request.setAttribute("passenger2_age", pa2);
+				// request.setAttribute("passenger3_age", pa3);
+				// request.setAttribute("passenger4_age", pa4);
+				// request.setAttribute("passenger5_age", pa5);
+				System.out.println("hrllo9");
+				// request.setAttribute("passenger1_gender", pg1);
+				// request.setAttribute("passenger2_gender", pg2);
+				// request.setAttribute("passenger3_gender", pg3);
+				// request.setAttribute("passenger4_gender", pg4);
+				// request.setAttribute("passenger5_gender", pg5);
+				System.out.println("hrllo");
+				request.getRequestDispatcher("/preview.jsp").forward(request, response);
+
+				System.out.println("hrllo1");
+				// dispatcher.sendRedirect(request, response);
+			}
 		} catch (Exception e) {
 
 		}
 	}
-
-	
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -198,7 +224,260 @@ public class TrainController extends HttpServlet {
 	}
 }
 
-package MVC;
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"
+    %>
+  
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<form action="
+<table>
+
+  <tr>
+    <th>Train Number</th>
+    <th>Train Name</th>
+    <th>From</th>
+    <th>To</th>
+    <th>Class</th>
+    <th>Fare</th>
+  </tr>
+  <tr>
+    <td><%  response.getWriter().print(request.getParameter("TrainNo"));%>  </td>
+    
+    <td><% response.getWriter().print(request.getParameter("TrainName")); %></td>
+    <td><% response.getWriter().print(request.getParameter("from"));%></td>
+    <td><% response.getWriter().print(request.getParameter("to")); %></td>
+    <td><%  response.getWriter().print(request.getParameter("lsc"));%></td>
+  </tr>
+</table>
+<br>
+<table>
+  <tr>
+    <th>Passenger Name</th>
+    <th>Passenger Age</th>
+    <th>Passenger Gender</th>
+  </tr>
+  <tr>
+    <td><% response.getWriter().print(request.getParameter("p1")); %></td>
+    <td><%response.getWriter().print( request.getParameter("pa1")); %></td>
+      <td><%response.getWriter().print( request.getParameter("pg1"));%></td>
+  </tr>
+  <tr>
+    <td><%  response.getWriter().print(request.getParameter("p2")); %></td>
+    <td><%response.getWriter().print(request.getParameter("pa2")); %></td>
+      <td><% response.getWriter().print( request.getParameter("pg2")); %></td>
+  </tr>
+  <tr>
+ <td><%response.getWriter().print(request.getParameter("p3")); %></td>
+    <td><% response.getWriter().print(request.getParameter("pa3")) ;%></td>
+      <td><% response.getWriter().print( request.getParameter("pg3")); %></td>
+  </tr>
+  <tr>
+    <td><% response.getWriter().print( request.getParameter("p4"));%></td>
+    <td><%response.getWriter().print(request.getParameter("pa4"));%></td>
+      <td><% response.getWriter().print( request.getParameter("pg4")); %></td>
+  </tr>
+  <tr>
+    <td><%  response.getWriter().print(request.getParameter("p5")); %></td>
+    <td><%  response.getWriter().print(request.getParameter("pa5")); %></td>
+      <td><%response.getWriter().print( request.getParameter("pg5")); %></td>
+  </tr>
+</body>
+</html>
+
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class BusinessLogicFare {
+	// TrainDAL td= new TrainDAL();
+	public List<Double> bbl(double classfare, double distfare, ArrayList<Passengers> pass) {
+
+		List<Double> fareList = new ArrayList<>();
+		for (Passengers y : pass) {
+			double TotalFare = distfare * classfare;
+			if (y.getage() > 0 && y.getage() < 6) {
+				TotalFare = 0;
+			} else if (y.getage() > 5 && y.getage() < 13) {
+				TotalFare = TotalFare / 2;
+			} else if (y.getage() >= 65 && y.getGender().equals("Male")) {
+				TotalFare = TotalFare - (TotalFare / 4);
+			} else if (y.getage() >= 58 && y.getGender().equals("Female")) {
+				TotalFare = TotalFare - (TotalFare / 4);
+			}
+			fareList.add(TotalFare);
+
+		}
+
+		return fareList;
+
+	}
+
+	public double bblFinal(double classfare, double distfare, ArrayList<Passengers> pass) {
+		double TotalFare = distfare * classfare;
+
+		for (Passengers y : pass) {
+
+			if (y.getage() > 0 && y.getage() < 6) {
+				TotalFare += 0;
+			} else if (y.getage() > 5 && y.getage() < 13) {
+				TotalFare += TotalFare / 2;
+			} else if (y.getage() >= 65 && y.getGender().equals("Male")) {
+				TotalFare += TotalFare - (TotalFare / 4);
+			} else if (y.getage() >= 58 && y.getGender().equals("Female")) {
+				TotalFare += TotalFare - (TotalFare / 4);
+			}
+
+		}
+
+		return TotalFare;
+
+	}
+}
+
+
+
+import java.util.ArrayList;
+
+public class Passengers {
+	String name;
+	int age;
+	String gender;
+	ArrayList<Passengers> pass;
+
+	Passengers(String pn, int pa, String pg) {
+		this.name = pn;
+		this.age = pa;
+		this.gender = pg;
+	}
+
+	Passengers(ArrayList<Passengers> pass) {
+		this.pass = pass;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getage() {
+		return age;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setage(int age) {
+		this.age = age;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public ArrayList<Passengers> getPass() {
+		return pass;
+	}
+
+}
+
+
+import java.util.ArrayList;
+
+public class FromTomodel {
+
+	String from;
+	String to;
+	ArrayList<String> al = new ArrayList();
+
+	FromTomodel() {
+
+	}
+
+	public String getfrom() {
+		String s = " ";
+		for (int i = 0; i < al.size(); i++) {
+			s = s + al.get(i) + ",";
+		}
+		return s;
+	}
+
+	public void setfrom(String from) {
+		al.add(from);
+	}
+
+}
+
+
+
+import java.util.ArrayList;
+
+public class TrainsModel {
+	String TrainName;
+	int Trainno;
+
+	String from;
+	String to;
+	ArrayList<String> tn = new ArrayList();
+	ArrayList<String> tr = new ArrayList();
+
+	TrainsModel() {
+
+	}
+
+	public String getTrainName() {
+		String s = " ";
+		for (int i = 0; i < tn.size(); i++) {
+			s = s + tn.get(i) + ",";
+		}
+		return s;
+
+	}
+
+	public void setTrainName(String Trn) {
+		tn.add(Trn);
+	}
+
+	public String getTrainno() {
+		String s = " ";
+		for (int i = 0; i < tr.size(); i++) {
+			s = s + tr.get(i) + ",";
+		}
+		return s;
+	}
+
+	public void setTrainno(String trno) {
+		tr.add(trno);
+	}
+
+	public String getfrom() {
+		return from;
+	}
+
+	public void setfrom(String from) {
+		this.from = from;
+	}
+
+	public String getto() {
+		return to;
+	}
+
+	public void setto(String to) {
+		this.to = to;
+	}
+}
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -210,7 +489,9 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletResponse;
 
 public class TrainDAL {
-	public String FromTo(HttpServletResponse response) {
+
+	public FromTomodel FromTo(HttpServletResponse response) {
+		FromTomodel fm = new FromTomodel();
 		String s1 = " ";
 		try {
 			Connection c = null;
@@ -218,7 +499,7 @@ public class TrainDAL {
 
 			String s = "";
 
-			s = "jdbc:postgresql://localhost:5432/newdb?user=postgres&password=Beuganji7@";
+			s = "jdbc:postgresql://192.168.110.48:5432/plf_training?user=plf_training_admin&password=pff123";
 
 			c = DriverManager.getConnection(s);
 			Statement st = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -227,22 +508,27 @@ public class TrainDAL {
 			String arr[] = {};
 			while (stt.next()) {
 
-				s1 = s1 + stt.getString(1) + ",";
+				s1 = s1 + stt.getString(1);
+				fm.setfrom(s1);
+
+				s1 = " ";
 			}
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		return s1;
+
+		return fm;
 	}
 
-	public String Trains(String from, String to, HttpServletResponse response) {
+	public TrainsModel Trains(String from, String to, HttpServletResponse response) {
+		TrainsModel tm = new TrainsModel();
 		String dat = "";
 		try {
 			Connection c = null;
 
 			Class.forName("org.postgresql.Driver");
 
-			String s = "jdbc:postgresql://localhost:5432/newdb?user=postgres&password=Beuganji7@";
+			String s = "jdbc:postgresql://192.168.110.48:5432/plf_training?user=plf_training_admin&password=pff123";
 
 			c = DriverManager.getConnection(s);
 
@@ -254,40 +540,46 @@ public class TrainDAL {
 			ResultSet stt = p.executeQuery();
 
 			while (stt.next()) {
-				for (int i = 1; i <= 2; i++) {
-					dat += stt.getString(i) + " ";
 
-				}
-				dat += ",";
+				dat = stt.getString(1);
+				tm.setTrainno(dat);
+				dat = stt.getString(2);
+				tm.setTrainName(dat);
+
+				dat = " ";
 
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return dat;
+		return tm;
 	}
 
-	public String TrainClass(int TrainNo, HttpServletResponse response) {
+	public ClassModel TrainClass(int TrainNo, HttpServletResponse response) {
 		String se = " ";
+		ClassModel cm = new ClassModel();
 		try {
 			Connection conn = null;
 
 			String cs;
 			Class.forName("org.postgresql.Driver");
-			cs = "jdbc:postgresql://localhost:5432/newdb?user=postgres&password=Beuganji7@";
+			cs = "jdbc:postgresql://192.168.110.48:5432/plf_training?user=plf_training_admin&password=pff123";
 			conn = DriverManager.getConnection(cs);
 			Statement st = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			ResultSet stt = st.executeQuery("select * from tn_tvl_classes where tr_no =" + TrainNo + " ");
 			System.out.println("hello1");
 			stt.absolute(0);
 			while (stt.next()) {
-
+				se = " ";
 				se += stt.getString(2) + ",";
+
+				cm.setcls(se);
 			}
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		return se;
+		return cm;
 	}
 
 	public int TrainFaredist(String from, String to, int TrainNo, HttpServletResponse response) {
@@ -299,7 +591,7 @@ public class TrainDAL {
 			Class.forName("org.postgresql.Driver");
 
 			String s = "";
-			s = "jdbc:postgresql://localhost:5432/newdb?user=postgres&password=Beuganji7@";
+			s = "jdbc:postgresql://192.168.110.48:5432/plf_training?user=plf_training_admin&password=pff123";
 			c = DriverManager.getConnection(s);
 
 			Statement st = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -367,7 +659,7 @@ public class TrainDAL {
 			Class.forName("org.postgresql.Driver");
 
 			String s = "";
-			s = "jdbc:postgresql://localhost:5432/newdb?user=postgres&password=Beuganji7@";
+			s = "jdbc:postgresql://192.168.110.48:5432/plf_training?user=plf_training_admin&password=pff123";
 			c = DriverManager.getConnection(s);
 
 			Statement st = c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -399,7 +691,7 @@ public class TrainDAL {
 			Class.forName("org.postgresql.Driver");
 
 			String s = "";
-			s = "jdbc:postgresql://localhost:5432/newdb?user=postgres&password=Beuganji7@";
+			s = "jdbc:postgresql://192.168.110.48:5432/plf_training?user=plf_training_admin&password=pff123";
 			c = DriverManager.getConnection(s);
 			PreparedStatement statement = null;
 			for (Passengers ps : pass) {
@@ -428,29 +720,24 @@ public class TrainDAL {
 
 }
 
-package MVC;
 
 import java.util.ArrayList;
 
-public class TicketModel {
+public class ClassModel {
 	String TrainName;
 	int Trainno;
-	String cls;
+
 	String from;
 	String to;
-	ArrayList<Passengers> pass;
+	ArrayList<String> tnc = new ArrayList();
 
-	TicketModel(String Trn, int trno, String cls, String from, String to, ArrayList<Passengers> pass) {
-		this.TrainName = Trn;
-		this.Trainno = trno;
-		this.cls = cls;
-		this.from = from;
-		this.to = to;
+	ClassModel() {
 
 	}
 
 	public String getTrainName() {
 		return TrainName;
+
 	}
 
 	public void setTrainName(String Trn) {
@@ -466,509 +753,15 @@ public class TicketModel {
 	}
 
 	public String getcls() {
-		return cls;
+		String s = " ";
+		for (int i = 0; i < tnc.size(); i++) {
+			s = s + tnc.get(i) + ",";
+		}
+		return s;
 	}
 
 	public void setcls(String cls) {
-		this.cls = cls;
+		tnc.add(cls);
 	}
 
-	public String getfrom() {
-		return from;
-	}
-
-	public void setfrom(String from) {
-		this.from = from;
-	}
-
-	public String getto() {
-		return to;
-	}
-
-	public void setto(String to) {
-		this.to = to;
-	}
-}
-
-package MVC;
-
-public class Passengers {
-	String name;
-	int age;
-String gender;
-	Passengers(String pn, int pa,String pg) {
-		this.name = pn;
-		this.age = pa;
-		this.gender=pg;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public int getage() {
-		return age;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setage(int age) {
-		this.age = age;
-	}
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-	public String getGender() {
-		return gender;
-	}
-
-	
-	
-}
-
-
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="ISO-8859-1">
-
-<title>Railway Reservation</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-</head>
-<body>
-<center>
-<h1>Train Reservation</h1></center>
-
-
-<script>
-function fun1(){
-	var status="FromTo";
-	$.ajax({
-	//	url:'FromToTrainServlet',
-		url:'TrainController',
-		method:'POST',
-		data:{
-		status:status
-		},
-		success: function(resultText){
-			$('#results').html(resultText);
-			$('#resultss').html(resultText);
-			
-		},
-		error:function(jqXHR,exception){
-			console.log('Error Occured!');
-		}
-	})
-}</script>
-<center>
-From : <Select id="results"  ></Select>
-To : <Select id="resultss" Onchange="fun()"></Select>
-</center>
-<center><br><br>
-Date:<input type="text" id="date"/><br><br></center>
-<center><button onclick="fun1()">submit</button></center>
-<script>
-function fun(){
-	var from=$('#results').val();
-	var to=$('#resultss').val();
-	var dates=$('#date').val();
-	var status="Trains";
-	$('#From').val(from);
-	$('#To').val(to);
-	
-	$.ajax({
-		success: function (resultText) {
-            $('#resultw').html(resultText);
-         },
-         error: function (jqXHR, exception) {
-             console.log('Error occured!!');
-          }
-	})
-	$.ajax({
-		
-		//url:'TrainsServlet',
-		url:'TrainController',
-		method:'POST',
-		data:{
-			from:from,to:to,status:status
-		},
-        success: function (resultText) {
-            $('#resultw').html(resultText);
-         },
-         error: function (jqXHR, exception) {
-             console.log('Error occured!!');
-          }
-	})
-	
-}
-</script><br><br>
-<center><Select id="resultw" onChange="fun2()">
-</Select></center>
-<center>
-Class: <Select id="resultClass" ></Select>
-
-</center>
-<form  >
-<center><h1>Train Details</h1></center>
-<center>
-
-Train Number:<input type="text" name="TrainNo" id="TrainNo"/><br><br>
-Train Name:<input type="text" name="TrainName" id="TrainName"/><br><br>
-From:<input type="text" name="From" id="From"/><br><br>
-To:<input type="text" name="To" id="To"/><br><br>
-Train Class:<input type="text" name="TrainClass" id="TrainClass"/><br><br>
-Fare:<input type="text" name="fare" id="fare" /><br><br>
-
-
-  <h2>Passenger 1:</h2>
- 
-  Name:<input type="text" id="passenger1_name" name="passenger1_name" pattern="[A-Za-z]+" title="Please enter a valid name (text only)" required>
-  <br>
-  <label for="passenger1_age">Age:</label>
-  <input  id="passenger1_age" name="passenger1_age" type="number" min="1" max="119" title="Please enter a valid age (0-119)" required>
-  <br>
-  <label><input type="radio" name="passenger1_gender" id="passenger1_gender" value="Male" onclick="updateGenderTextField(this.value)">Male</label>
-  <label><input type="radio" name="passenger1_gender" id="passenger1_gender" value="Female" onclick="updateGenderTextField(this.value)">Female</label>
-   <h2>Passenger 2:</h2>
-  <label for="passenger2_name">Name:</label>
-  <input type="text" id="passenger2_name" name="passenger2_name" pattern="[A-Za-z]+" title="Please enter a valid name (text only)" required>
-  <br>
-  <label for="passenger2_age">Age:</label>
-  <input type="number" min="1" max="119" title="Please enter a valid age (0-119)" required id="passenger2_age" name="passenger2_age">
-  <br>
-  <label><input type="radio" name="passenger2_gender" id="passenger2_gender" value="Male" onclick="updateGenderTextField(this.value)">Male</label>
-  <label><input type="radio" name="passenger2_gender" id="passenger2_gender" value="Female" onclick="updateGenderTextField(this.value)">Female</label>
-  <br>
-
-  <!-- Repeat the above fields for Passenger 2, Passenger 3, Passenger 4, and Passenger 5 -->
-
-  <h2>Passenger 3:</h2>
-  <label for="passenger3_name">Name:</label>
-  <input type="text" id="passenger3_name" name="passenger3_name" pattern="[A-Za-z]+" title="Please enter a valid name (text only)" required>
-  <br>
-  <label for="passenger3_age">Age:</label>
-  <input type="number" min="1" max="119" title="Please enter a valid age (0-119)" required id="passenger3_age" name="passenger3_age">
-  <br>
-  <label><input type="radio" name="passenger3_gender" id="passenger3_gender" value="Male" onclick="updateGenderTextField(this.value)">Male</label>
-  <label><input type="radio" name="passenger3_gender"  id="passenger3_gender"value="Female" onclick="updateGenderTextField(this.value)">Female</label>
-  <br>
-
-  <h2>Passenger 4:</h2>
-  <label for="passenger4_name">Name:</label>
-  <input type="text" id="passenger4_name" name="passenger4_name" pattern="[A-Za-z]+" title="Please enter a valid name (text only)" required>
-  <br>
-  <label for="passenger4_age">Age:</label>
-  <input type="number" min="1" max="119" title="Please enter a valid age (0-119)" required id="passenger4_age" name="passenger4_age">
-  <br>
-  <label><input type="radio" name="passenger4_gender" id="passenger4_gender" value="Male" onclick="updateGenderTextField(this.value)">Male</label>
-  <label><input type="radio" name="passenger4_gender"  id="passenger4_gender" value="Female" onclick="updateGenderTextField(this.value)">Female</label>
-  <br>
-<h2>Passenger 5:</h2>
-  <label for="passenger5_name">Name:</label>
-  <input type="text" id="passenger5_name" name="passenger5_name" pattern="[A-Za-z]+" title="Please enter a valid name (text only)" required>
-  <br>
-  <label for="passenger5_age">Age:</label>
-  <input type="number" min="1" max="119" title="Please enter a valid age (0-119)" id="passenger5_age" name="passenger5_age" onChange="fun4class()">
-  <br>
-   <label><input type="radio" name="passenger5_gender" id="passenger5_gender" value="Male" >Male</label>
-  <label><input type="radio" name="passenger5_gender" id="passenger5_gender" value="Female" >Female</label>
-  <br>
-
-
-
-
-
- 
- 
-</center>
-</form>
-
-<center><button onclick="SavePreview()">Submit</button></center>
-
-<script>
-function fun2(){
-	var arr= $('#resultw').val().split(" ");
-	$('#TrainNo').val(arr[0]);
-	$('#TrainName').val(arr[1]);
-	//$('#TrainClass').val(" ");
-	var status="Classes";
-	$.ajax({
-		//url:'TrainClassServlet',
-		url:'TrainController',
-		method:'POST',
-		data:{
-			TrainNo:arr[0],status:status
-		},
-		 success: function(resultText) {
-		      $('#resultClass').html(resultText);
-		    },
-		    error: function(jqXHR, exception) {
-		      console.log('Error Occurred!');
-		    }
-		
-       
-	})
-	
-}
-</script>
-
-
-
-<script>
-function fun4class(){
-	var arr= $('#resultClass').val();
-	var arr1= $('#resultw').val().split(" ");
-	var from=$('#results').val();
-	var to=$('#resultss').val();
-	var dates=$('#date').val();
-	var p1age=$('#passenger1_age').val();
-	var p2age=$('#passenger2_age').val();
-	var p3age=$('#passenger3_age').val();
-	var p4age=$('#passenger4_age').val();
-	var p5age=$('#passenger5_age').val();
-	var p1n=$('#passenger1_name').val();
-	var p2n=$('#passenger2_name').val();
-	var p3n=$('#passenger3_name').val();
-	var p4n=$('#passenger4_name').val();
-	var p5n=$('#passenger5_name').val();
-	
-	var pg1=$('#passenger1_gender').val();
-	var pg2=$('#passenger2_gender').val();
-	var pg3=$('#passenger3_gender').val();
-	var pg4=$('#passenger4_gender').val();
-	var pg5=$('#passenger5_gender').val();
-	var status="Fare";
-	$('#TrainClass').val(arr);
-	
-	
-	$.ajax({
-		//url:'TrainFareServlet',
-		url:'TrainController',
-		method:'POST',
-		data:{
-			from:from,to:to,TrainNo:arr1[0],lsc:arr,pg1:pg1,pg2:pg2,pg3:pg3,pg4:pg4,pg5:pg5,pa1:p1age,pa2:p2age,pa3:p3age,pa4:p4age,pa5:p5age,p1:p1n,p2:p2n,p3:p3n,p4:p4n,p5:p5n,status:status
-		},
-	
-	 success: function(resultText) {
-		 $('#passenger5_age').html(resultText);
-		    },
-		    error: function(jqXHR, exception) {
-		      console.log('Error Occurred!');
-		    }
-	})
-}
-</script>
-<script>
-function SavePreview(){
-	var arr= $('#TrainClass').val();
-	var arr1= $('#resultw').val().split(" ");
-	var from=$('#results').val();
-	var to=$('#resultss').val();
-	var dates=$('#date').val();
-	var p1age=$('#passenger1_age').val();
-	var p2age=$('#passenger2_age').val();
-	var p3age=$('#passenger3_age').val();
-	var p4age=$('#passenger4_age').val();
-	var p5age=$('#passenger5_age').val();
-	var p1n=$('#passenger1_name').val();
-	var p2n=$('#passenger2_name').val();
-	var p3n=$('#passenger3_name').val();
-	var p4n=$('#passenger4_name').val();
-	var p5n=$('#passenger5_name').val();
-	var TrainName=$('#TrainName').val();
-	var fare=$("#fare").val();
-	var status="Save";
-	
-	
-	
-	$.ajax({
-		//url:'TrainFareServlet',
-		url:'TrainController',
-		method:'POST',
-		data:{
-			from:from,to:to,TrainNo:arr1[0],lsc:arr,fare:fare,pa1:p1age,pa2:p2age,pa3:p3age,pa4:p4age,pa5:p5age,p1:p1n,p2:p2n,p3:p3n,p4:p4n,p5:p5n,status:status
-		},
-	
-	
-	})
-}
-</script>
-
-<script>
-function fun5pass(){
-	var arr= $('#TrainNo').val();
-	var arr1= $('#TrainName').val();
-	var from=$('#From').val();
-	var to=$('#To').val();
-	var dates=$('#TrainClass').val();
-	var datess=$('#fare').val();
-	
-	
-	
-	
-	$.ajax({
-		//url:'PassengerServlet',
-		url:'TrainController',
-		method:'POST',
-		data:{
-			TrainNo:arr,TrainName:arr1,From:from,To:to,TrainClass:dates,fare:datess
-		}
-		
-	
-	
-	})
-}
-</script>
-<script >
-function fares() {
-    $.ajax({
-       // url: "TrainFareServlet",
-       url:'TrainController',
-        type: "POST",
-        success: function (response) {
-        
-        	if(response){
-  			  var fare = response;     
-            $('#fare').val(fare);
-           
-        	}
-        	else{
-        		alert("Error");
-        	}
-           
-        },
-        error: function (xhr, status, error) {
-            alert("An error occurred while fetching the record: " + error);
-        }
-    });
-}</script>
-
-
-<script>
-  function updateGenderTextField(value) {
-    var genderTextField = document.getElementById("genderTextField");
-    genderTextField.value = value;
-  }
-
-  </script>
-
-   
-
-</body>
-</html>
-
-
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="ISO-8859-1">
-<title>Insert title here</title>
-</head>
-<body>
-<table>
-  <tr>
-    <th>Train Number</th>
-    <th>Train Name</th>
-    <th>From</th>
-    <th>To</th>
-    <th>Class</th>
-    <th>Fare</th>
-  </tr>
-  <tr>
-    <td><%= request.getAttribute("TrainNo") %></td>
-    <td><%= request.getAttribute("TrainName") %></td>
-    <td><%= request.getAttribute("From") %></td>
-    <td><%= request.getAttribute("To") %></td>
-    <td><%= request.getAttribute("TrainClass") %></td>
-    <td><%= request.getAttribute("fare") %></td>
-  </tr>
-</table>
-<br>
-<table>
-  <tr>
-    <th>Passenger Name</th>
-    <th>Passenger Age</th>
-  </tr>
-  <tr>
-    <td><%= request.getAttribute("passenger1_name") %></td>
-    <td><%= request.getAttribute("passenger1_age") %></td>
-  </tr>
-  <tr>
-    <td><%= request.getAttribute("passenger2_name") %></td>
-    <td><%= request.getAttribute("passenger2_age") %></td>
-  </tr>
-  <tr>
- <td><%= request.getAttribute("passenger3_name") %></td>
-    <td><%= request.getAttribute("passenger3_age") %></td>
-  </tr>
-  <tr>
-    <td><%= request.getAttribute("passenger4_name") %></td>
-    <td><%= request.getAttribute("passenger4_age") %></td>
-  </tr>
-  <tr>
-    <td><%= request.getAttribute("passenger5_name") %></td>
-    <td><%= request.getAttribute("passenger5_age") %></td>
-  </tr>
-</body>
-</html>
-
-package MVC;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class BusinessLogicFare {
-TrainDAL td= new TrainDAL();
-public List<Double> bbl(double classfare,double distfare,ArrayList<Passengers> pass) {
-	
-	
-	 List<Double> fareList = new ArrayList<>();
-	for (Passengers y : pass) {
-		double TotalFare = distfare * classfare;
-		if (y.getage() > 0 && y.getage() < 6) {
-			TotalFare = 0;
-		} else if (y.getage() > 5 && y.getage() < 13) {
-			TotalFare = TotalFare / 2;
-		}
-		else if(y.getage()>=65 && y.getGender().equals("Male")) {
-			TotalFare = TotalFare-(TotalFare / 4);
-		}
-		else if(y.getage()>=58 && y.getGender().equals("Female")) {
-			TotalFare = TotalFare-(TotalFare / 4);
-		}
-		fareList.add(TotalFare);
-		
-	}
-
-	return fareList;
-	
-}
-public double bblFinal(double classfare,double distfare,ArrayList<Passengers> pass) {
-	double TotalFare = distfare * classfare;
-	
-	
-	for (Passengers y : pass) {
-
-		if (y.getage() > 0 && y.getage() < 6) {
-			TotalFare += 0;
-		} else if (y.getage() > 5 && y.getage() < 13) {
-			TotalFare += TotalFare / 2;
-		}
-		else if(y.getage()>=65 && y.getGender().equals("Male")) {
-			TotalFare += TotalFare-(TotalFare / 4);
-		}
-		else if(y.getage()>=58 && y.getGender().equals("Female")) {
-			TotalFare += TotalFare-(TotalFare / 4);
-		}
-		
-		
-	}
-
-	return TotalFare;
-	
-}
 }
